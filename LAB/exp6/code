@@ -1,0 +1,74 @@
+Exp: Seven Segment Display
+#include <LPC214x.h>
+
+#define DS3       (1 << 13)       // P0.13
+#define DS4       (1 << 12)       // P0.12
+
+#define SEG_CODE  (0xFF << 16)    // P0.16 - P0.23
+
+unsigned char const seg_dat[] =
+{
+    0x3F,   // 0
+    0x06,   // 1
+    0x5B,   // 2
+    0x4F,   // 3
+    0x66,   // 4
+    0x6D,   // 5
+    0x7D,   // 6
+    0x07,   // 7
+    0x7F,   // 8
+    0x67    // 9
+};
+
+void delayms(int n)
+{
+    int i, j;
+
+    for(i = 0; i < n; i++)
+    {
+        for(j = 0; j < 5035; j++)
+        {
+            ;
+        }
+    }
+}
+
+int main(void)
+{
+    unsigned char count;
+
+    /* Configure P0 as GPIO */
+    PINSEL0 = 0;
+    PINSEL1 = 0;
+
+    /* P0.12, P0.13 and P0.16-P0.23 as output */
+    IODIR0 = SEG_CODE | DS3 | DS4;
+
+    /* Disable DS3 */
+    IOSET0 = DS3;
+
+    /* Enable DS4 */
+    IOCLR0 = DS4;
+
+    count = 0;
+
+    /* Display initial value 0 */
+    IOCLR0 = SEG_CODE;
+    IOSET0 = ((unsigned long)seg_dat[count] << 16);
+
+    while(1)
+    {
+        delayms(1000);
+
+        count++;
+
+        if(count > 9)
+        {
+            count = 0;
+        }
+
+        /* Display count */
+        IOCLR0 = SEG_CODE;
+        IOSET0 = ((unsigned long)seg_dat[count] << 16);
+    }
+}
